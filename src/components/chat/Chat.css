@@ -1,0 +1,7 @@
+.own{
+    align-self: flex-end;
+
+    p{
+        background-color: #5183fe;
+    }
+}

@@ -8,3 +8,5 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <App />
   </React.StrictMode>,
 )
+
+// 42 min https://www.youtube.com/watch?v=domt_Sx-wTY
