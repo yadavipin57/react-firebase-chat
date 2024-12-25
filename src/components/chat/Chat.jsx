@@ -1,14 +1,109 @@
 import EmojiPicker from "emoji-picker-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./Chat.css";
+import {
+  arrayUnion,
+  doc,
+  getDoc,
+  onSnapshot,
+  updateDoc,
+} from "firebase/firestore";
+import { db } from "../../library/firebase";
+import { useChatStore } from "../../library/chatStore";
+import { useUserStore } from "../../library/userStore";
+import upload from "../../library/upload";
 
 const Chat = () => {
+  const [chat, setChat] = useState();
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
+  const [img, setImg] = useState({
+    file: null,
+    url: "",
+  });
+
+  const { currentUser } = useUserStore();
+  const { chatId, user, isCurrentUserBlocked, isRecieverBlocked } =
+    useChatStore();
+
+  const endRef = useRef(null);
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
+  useEffect(() => {
+    const unSub = onSnapshot(doc(db, "chats", chatId), (response) => {
+      setChat(response.data());
+    });
+    return () => {
+      unSub();
+    };
+  }, [chatId]);
 
   const handleEmoji = (e) => {
     setText((prev) => prev + e.emoji);
     setOpen(false);
+  };
+
+  const handleSend = async () => {
+    if (text === "") return;
+
+    let imgUrl = null;
+
+    try {
+      if (img.file) {
+        imgUrl = await upload(img.file);
+      }
+
+      await updateDoc(doc(db, "chats", chatId), {
+        messages: arrayUnion({
+          senderId: currentUser,
+          text,
+          createdAt: new Date(),
+          ...(imgUrl && { img: imgUrl }),
+        }),
+      });
+
+      const userIDs = [currentUser.id, user.id];
+      userIDs.forEach(async (id) => {
+        const userChatsRef = doc(db, "userchats", id);
+        const userChatsSnapshot = await getDoc(userChatsRef);
+
+        if (userChatsSnapshot.exists()) {
+          const userChatsData = userChatsSnapshot.data();
+          const chatIndex = userChatsData.chats.findIndex(
+            (c) => c.chatId === chatId
+          );
+          userChatsData.chats[chatIndex].lastMessage = text;
+          userChatsData.chats[chatIndex].isSeen =
+            id === currentUser.id ? true : false;
+          userChatsData.chats[chatIndex].updatedAt = Date.now();
+
+          await updateDoc(userChatsRef, {
+            chats: userChatsData.chats,
+          });
+        }
+      });
+    } catch (error) {
+      console.log(error);
+    }
+
+    setText(""),
+      setImg({
+        file: null,
+        url: "",
+      });
+  };
+
+  const handleImage = (e) => {
+    // This gives an event
+    if (e.target.files[0]) {
+      setImg({
+        file: e.target.files[0],
+        url: URL.createObjectURL(e.target.files[0]),
+      });
+    }
   };
 
   return (
@@ -17,11 +112,11 @@ const Chat = () => {
       <div className="p-5 flex items-center justify-between border-[#dddddd35] border-b-[1px] border-r-[1px]">
         <div className="flex items-center gap-5">
           <img
-            className="w-[60px] h-[60px] rounded-full cover "
-            src="./avatar.png"
+            className="w-[60px] h-[60px] rounded-full object-cover "
+            src={user?.avatar || "./avatar.png"}
           />
           <div className="flex flex-col gap-1">
-            <span className="text-[18px] font-bold">Jane Doe</span>
+            <span className="text-[18px] font-bold">{user.username}</span>
             <p className="text-[14px] text-[#a5a5a5]">
               Lorem ipsum dolor sit amet consectetur adipisicing elit.
             </p>
@@ -36,152 +131,63 @@ const Chat = () => {
 
       {/* CENTER  */}
       <div className="p-5 flex flex-col gap-5 overflow-y-scroll flex-1 ">
-        <div className="max-w-[80%] flex gap-5 own">
-          <div className="flex flex-col gap-1 flex-1">
-            <img
-              className="self-end cover w-[50%] h-auto cursor-pointer"
-              src="https://images.pexels.com/photos/29874884/pexels-photo-29874884/free-photo-of-australian-shepherd-by-christmas-tree.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-            />
-            <p className="p-2 rounded-lg text-sm">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quia
-              natus quaerat reprehenderit architecto iusto animi ea, quasi
-              voluptatibus. Ab laudantium voluptatem consequuntur vitae quaerat
-              animi.
-            </p>
-            <span className="text-[10px]">1 min agon</span>
+        {chat?.messages?.map((message) => {
+          return (
+            <div
+              className={`max-w-[80%] flex gap-5 ${
+                message.senderId.id === currentUser?.id ? "sender" : "reciever"
+              }`}
+              key={message.createdAt}
+            >
+              <div className="flex flex-col gap-1 flex-1">
+                {message.img && (
+                  <img
+                    className="self-end cover w-[50%] h-auto cursor-pointer"
+                    src={message.img}
+                  />
+                )}
+                <p className="p-2 rounded-lg text-sm">{message.text}</p>
+                <span className="text-[10px]">1 min agon</span>
+              </div>
+            </div>
+          );
+        })}
+        {img.url && (
+          <div className="max-w-[80%] flex gap-5 sender">
+            <div className="flex flex-col gap-1 flex-1">
+              <img
+                className="self-end cover w-[50%] h-auto cursor-pointer"
+                src={img.url}
+                alt=""
+              />
+            </div>
           </div>
-        </div>
-        <div className="max-w-[80%] flex gap-5">
-          <img className="w-10 h-10 rounded-full cover" src="./avatar.png" />
-          <div className="flex flex-col gap-1 flex-1 ">
-            <p className="p-2 rounded-lg text-sm bg-[#1119284d]">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quia
-              natus quaerat reprehenderit architecto iusto animi ea, quasi
-              voluptatibus. Ab laudantium voluptatem consequuntur vitae quaerat
-              animi.
-            </p>
-            <span className="text-[10px]">1 min agon</span>
-          </div>
-        </div>
-
-        <div className="max-w-[80%] flex gap-5 own">
-          <div className="flex flex-col gap-1 flex-1">
-            <p className="p-2 rounded-lg text-sm">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quia
-              natus quaerat reprehenderit architecto iusto animi ea, quasi
-              voluptatibus. Ab laudantium voluptatem consequuntur vitae quaerat
-              animi.
-            </p>
-            <span className="text-[10px]">1 min agon</span>
-          </div>
-        </div>
-        <div className="max-w-[80%] flex gap-5">
-          <img className="w-10 h-10 rounded-full cover" src="./avatar.png" />
-          <div className="flex flex-col gap-1 flex-1 ">
-            <p className="p-2 rounded-lg text-sm bg-[#1119284d]">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quia
-              natus quaerat reprehenderit architecto iusto animi ea, quasi
-              voluptatibus. Ab laudantium voluptatem consequuntur vitae quaerat
-              animi.
-            </p>
-            <span className="text-[10px]">1 min agon</span>
-          </div>
-        </div>
-
-        <div className="max-w-[80%] flex gap-5 own">
-          <div className="flex flex-col gap-1 flex-1">
-            <p className="p-2 rounded-lg text-sm">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quia
-              natus quaerat reprehenderit architecto iusto animi ea, quasi
-              voluptatibus. Ab laudantium voluptatem consequuntur vitae quaerat
-              animi.
-            </p>
-            <span className="text-[10px]">1 min agon</span>
-          </div>
-        </div>
-        <div className="max-w-[80%] flex gap-5">
-          <img className="w-10 h-10 rounded-full cover" src="./avatar.png" />
-          <div className="flex flex-col gap-1 flex-1 ">
-            <p className="p-2 rounded-lg text-sm bg-[#1119284d]">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quia
-              natus quaerat reprehenderit architecto iusto animi ea, quasi
-              voluptatibus. Ab laudantium voluptatem consequuntur vitae quaerat
-              animi.
-            </p>
-            <span className="text-[10px]">1 min agon</span>
-          </div>
-        </div>
-
-        <div className="max-w-[80%] flex gap-5 own">
-          <div className="flex flex-col gap-1 flex-1">
-            <p className="p-2 rounded-lg text-sm">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quia
-              natus quaerat reprehenderit architecto iusto animi ea, quasi
-              voluptatibus. Ab laudantium voluptatem consequuntur vitae quaerat
-              animi.
-            </p>
-            <span className="text-[10px]">1 min agon</span>
-          </div>
-        </div>
-        <div className="max-w-[80%] flex gap-5">
-          <img className="w-10 h-10 rounded-full cover" src="./avatar.png" />
-          <div className="flex flex-col gap-1 flex-1 ">
-            <img
-              className="self-start cover w-[50%] h-auto cursor-pointer"
-              src="https://images.pexels.com/photos/29874884/pexels-photo-29874884/free-photo-of-australian-shepherd-by-christmas-tree.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-            />
-            <p className="p-2 rounded-lg text-sm bg-[#1119284d]">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quia
-              natus quaerat reprehenderit architecto iusto animi ea, quasi
-              voluptatibus. Ab laudantium voluptatem consequuntur vitae quaerat
-              animi.
-            </p>
-            <span className="text-[10px]">1 min agon</span>
-          </div>
-        </div>
-
-        <div className="max-w-[80%] flex gap-5 own">
-          <div className="flex flex-col gap-1 flex-1">
-            <img
-              className="self-end cover w-[50%] h-auto cursor-pointer"
-              src="https://images.pexels.com/photos/29874884/pexels-photo-29874884/free-photo-of-australian-shepherd-by-christmas-tree.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-            />
-            <p className="p-2 rounded-lg text-sm">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quia
-              natus quaerat reprehenderit architecto iusto animi ea, quasi
-              voluptatibus. Ab laudantium voluptatem consequuntur vitae quaerat
-              animi.
-            </p>
-            <span className="text-[10px]">1 min agon</span>
-          </div>
-        </div>
-        <div className="max-w-[80%] flex gap-5">
-          <img className="w-10 h-10 rounded-full cover" src="./avatar.png" />
-          <div className="flex flex-col gap-1 flex-1 ">
-            <p className="p-2 rounded-lg text-sm bg-[#1119284d]">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quia
-              natus quaerat reprehenderit architecto iusto animi ea, quasi
-              voluptatibus. Ab laudantium voluptatem consequuntur vitae quaerat
-              animi.
-            </p>
-            <span className="text-[10px]">1 min agon</span>
-          </div>
-        </div>
+        )}
+        <div ref={endRef}></div>
       </div>
 
       {/* BOTTOM  */}
       <div className="p-3 flex gap-2 items-center justify-evenly border-[#dddddd35] border-t-[1px]">
         <div className="flex gap-2">
-          <img className="w-5 h-5 cursor-pointer" src="./img.png" />
+          <label htmlFor="file">
+            <img className="w-5 h-5 cursor-pointer" src="./img.png" />
+          </label>
+          <input
+            className="hidden"
+            type="file"
+            id="file"
+            onChange={handleImage}
+          />
           <img className="w-5 h-5 cursor-pointer" src="./camera.png" />
           <img className="w-5 h-5 cursor-pointer" src="./mic.png" />
         </div>
         <input
-          className="p-2 border-none outline-none bg-[#111928ad] flex-1  rounded-lg"
+          className="p-2 border-none outline-none bg-[#111928ad] flex-1  rounded-lg disabled:cursor-not-allowed"
           onChange={(e) => setText(e.target.value)}
           value={text}
           type="text"
-          placeholder="Type a message..."
+          placeholder={(isCurrentUserBlocked || isRecieverBlocked) ? "You cannot send a message" : "Type a message..."}
+          disabled={isCurrentUserBlocked || isRecieverBlocked}
         />
         <div className="relative">
           <img
@@ -193,7 +199,13 @@ const Chat = () => {
             <EmojiPicker open={open} onEmojiClick={handleEmoji} />
           </div>
         </div>
-        <button className="px-4 py-2 bg-[#5183fe] rounded-lg">Send</button>
+        <button
+          className="px-4 py-2 bg-[#5183fe] rounded-lg disabled:bg-[#5182fe87] disabled:cursor-not-allowed"
+          onClick={handleSend}
+          disabled={isCurrentUserBlocked || isRecieverBlocked}
+        >
+          Send
+        </button>
       </div>
     </div>
   );

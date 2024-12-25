@@ -9,4 +9,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   </React.StrictMode>,
 )
 
-// 42 min https://www.youtube.com/watch?v=domt_Sx-wTY
+// 2 hour 26 min https://www.youtube.com/watch?v=domt_Sx-wTY
+
+// useEffect video https://www.youtube.com/watch?v=QQYeipc_cik

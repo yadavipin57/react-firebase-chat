@@ -1,7 +1,15 @@
-.own{
-    align-self: flex-end;
+.sender {
+  align-self: flex-end;
 
-    p{
-        background-color: #5183fe;
-    }
+  p {
+    background-color: #5183fe;
+  }
+}
+
+.reciever {
+  align-self: flex-start;
+
+  p {
+    background-color: #0648efc5;
+  }
 }
