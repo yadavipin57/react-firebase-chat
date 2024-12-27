@@ -2,7 +2,7 @@ import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { storage } from "./firebase";
 
 const upload = async (file) => {
-  const date = new Date(); // this and second parameter of the next line is written to avoid conficing name of the file.name
+  const date = new Date(); // this and second parameter of the next line is written to avoid conflicting name of the file.name
 
   const storageRef = ref(storage, `images/${date + file.name}`);
 

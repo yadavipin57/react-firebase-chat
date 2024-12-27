@@ -20,7 +20,6 @@ const Login = () => {
     file: null,
     url: "",
   });
-
   const [loading, setLoading] = useState(false);
 
   const handleAvatar = (e) => {
@@ -51,7 +50,11 @@ const Login = () => {
     const q = query(usersRef, where("username", "==", username));
     const querySnapshot = await getDocs(q);
     if (!querySnapshot.empty) {
-      return toast.warn("This username already exists! Select another username."), setLoading(false);
+      console.log(querySnapshot);
+      return (
+        toast.warn("This username already exists! Select another username."),
+        setLoading(false)
+      );
     }
 
     try {
@@ -189,3 +192,10 @@ export default Login;
 // FormData is a built-in JavaScript class used to create an object that represents form fields and their values. It is primarily designed for sending form data via fetch() or XMLHttpRequest, especially in scenarios like file uploads or when you need to handle multi-part form submissions.
 
 // When you pass e.target (the form element) to new FormData(e.target), it automatically collects all the form's fields (like inputs, textareas, checkboxes) and their values.
+
+
+// setDoc():
+// The setDoc() function is used to set (create or overwrite) a document in a Firestore collection.
+// It accepts two parameters:
+// A reference to the document (where to store it).
+// The data to be stored in the document.

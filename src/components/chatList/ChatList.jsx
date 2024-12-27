@@ -16,54 +16,57 @@ const ChatList = () => {
   useEffect(() => {
     const unSub = onSnapshot(
       doc(db, "userchats", currentUser.id),
-      async (response) => {
-        const items = response.data().chats;
+      async (res) => {
+        const items = res.data().chats; // items is array of objejcts
 
-        const promises = items.map(async (items) => {
-          const userDocRef = doc(db, "users", items.receiverId);
+        const promises = await items.map(async (item) => {
+          const userDocRef = doc(db, "users", item?.receiverId);
           const userDocSnap = await getDoc(userDocRef);
 
           const user = userDocSnap.data();
-
-          return { ...items, user };
+          // item is an element of the items array. item is an object.
+          return { ...item, user };
         });
 
         const chatData = await Promise.all(promises);
+
 
         setChats(chatData.sort((a, b) => b.updatedAt - a.updatedAt));
       }
     );
 
-    return () => unSub();
+    return () => {
+      unSub();
+    };
   }, [currentUser.id]);
 
   const handleSelect = async (chat) => {
-
-    const userChats = chats.map((item)=>{
-      const {user, ...rest} = item; 
+    const userChats = chats.map((item) => {
+      const { user, ...rest } = item;
       return rest;
-    })
+    });
 
-    const chatIndex = userChats.findIndex((item)=>item.chatId === chat.chatId)
+    const chatIndex = userChats.findIndex(
+      (item) => item?.chatId === chat?.chatId
+    );
 
     userChats[chatIndex].isSeen = true;
 
     const userChatsRef = doc(db, "userchats", currentUser.id);
 
-    try{
+    try {
       await updateDoc(userChatsRef, {
         chats: userChats,
-      })
+      });
       changeChat(chat.chatId, chat.user);
-    } catch(error){
-      console.log(error);
+    } catch (err) {
+      console.log(err);
     }
-
   };
 
-  const filteredChats = chats.filter((c)=>{
-    c.user.username.toLowerCase().includes(userSearch.toLowerCase());
-  })
+  const filteredChats = chats.filter((c) =>
+    c.user.username.toLowerCase().includes(userSearch.toLowerCase())
+  );
 
   return (
     <div className="px-2 flex-1 overflow-y-scroll">
@@ -91,8 +94,11 @@ const ChatList = () => {
             className={`p-5 flex items-center gap-5 cursor-pointer border-[#dddddd35] ${
               chat?.isSeen ? "bg-transparent" : "bg-[#5183fe]"
             }`}
-            key={chat.chatId}
-            onClick={() => handleSelect(chat)}
+            key={chat?.user?.id}
+            onClick={() => {
+              handleSelect(chat);
+              // handlePrintChat(chat);
+            }}
           >
             <img
               className="w-14 h-14 rounded-full object-cover "
