@@ -103,7 +103,7 @@ const Login = () => {
   };
 
   return (
-    <div className="w-full flex items-center justify-evenly">
+    <div className="mt-[144px] mb-10 sm:mt-0 sm:mb-0 w-full flex flex-col gap-5 sm:flex-row items-center justify-evenly">
       <div className="flex flex-col items-center gap-4 ">
         <h2 className="text-3xl font-bold">Welcome back,</h2>
         <form
@@ -131,7 +131,7 @@ const Login = () => {
         </form>
       </div>
 
-      <div className="w-[1px] h-[80%] bg-[#dddddd35]"></div>
+      <div className="w-[90%] h-[1px] sm:w-[1px] sm:h-[80%] bg-[#dddddd35]"></div>
 
       <div className="flex flex-col items-center gap-4 ">
         <h2 className="text-3xl font-bold">Create an account</h2>

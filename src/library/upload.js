@@ -18,6 +18,7 @@ const upload = async (file) => {
       },
       (error) => {
         reject(`Something went wrong ${error.code}`);
+        console.log(`${error.message}`);
       },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {

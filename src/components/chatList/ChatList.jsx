@@ -74,7 +74,7 @@ const ChatList = () => {
         <div className="flex items-center flex-1">
           <img className="p-2 w-8 h-8" src="./search.png" />
           <input
-            className="p-2  flex-1 border-none outline-none bg-transparent"
+            className="p-1 sm:p-2 flex-1 border-none outline-none bg-transparent"
             type="text"
             placeholder="Search..."
             onChange={(e)=>setUserSearch(e.target.value)}
@@ -91,7 +91,7 @@ const ChatList = () => {
       {filteredChats.map((chat) => {
         return (
           <div
-            className={`p-5 flex items-center gap-5 cursor-pointer border-[#dddddd35] ${
+            className={`p-1 flex items-center gap-5 cursor-pointer border-b-[1px] border-[#dddddd35] ${
               chat?.isSeen ? "bg-transparent" : "bg-[#5183fe]"
             }`}
             key={chat?.user?.id}
@@ -101,10 +101,10 @@ const ChatList = () => {
             }}
           >
             <img
-              className="w-14 h-14 rounded-full object-cover "
+              className="w-8 h-8 sm:w-14 sm:h-14 rounded-full object-cover "
               src={chat.user.blocked.includes(currentUser.id)? "./avatar.png" : chat.user.avatar || "./avatar.png"}
             />
-            <div className="flex flex-col">
+            <div className="flex flex-col overflow-hidden h-[72px]">
               <span className="text-[18px] font-bold">
                 {chat.user.blocked.includes(currentUser.id) ? "User" : chat.user.username}
               </span>

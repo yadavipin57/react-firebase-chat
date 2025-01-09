@@ -8,16 +8,21 @@
   box-sizing: border-box;
   font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
     "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+  }
+  body {
+    background-image: url("/bg.jpg");
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    color: white;
 }
-body {
-  background-image: url("/bg.jpg");
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  color: white;
-}
-
+/* @media (min-width: 400px) {
+  body {
+    background-image: url("/bg.jpg");
+    object-fit: cover;
+  }
+} */
 /* width */
 ::-webkit-scrollbar {
   width: 6px;

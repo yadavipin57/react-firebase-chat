@@ -2,11 +2,12 @@ import { arrayRemove, arrayUnion, doc, updateDoc } from "firebase/firestore";
 import { useChatStore } from "../../library/chatStore";
 import { auth, db } from "../../library/firebase";
 import { useUserStore } from "../../library/userStore";
+import { useEffect, useState } from "react";
 
 const Detail = () => {
   const { currentUser } = useUserStore();
   const { chatId, user, isCurrentUserBlocked, isRecieverBlocked, changeBlock } =
-    useChatStore();
+  useChatStore();
 
   const handleBlock = async () => {
     if (!user) return;
@@ -18,11 +19,11 @@ const Detail = () => {
         blocked: isRecieverBlocked ? arrayRemove(user.id) : arrayUnion(user.id),
       });
       changeBlock();
+      location.reload();
     } catch (error) {
       console.log(error);
     }
   };
-
   return (
     <div className="flex-1 overflow-y-scroll">
       <div className="mt-2 flex flex-col justify-evenly items-center gap-2 border-[#dddddd35] border-b-[1px]">
@@ -173,7 +174,7 @@ const Detail = () => {
           {isCurrentUserBlocked
             ? "You are blocked"
             : isRecieverBlocked
-            ? "User Blocked"
+            ? "User is blocked"
             : "Block User"}
         </button>
         <button

@@ -3,7 +3,7 @@ import UserInfo from "../userInfo/UserInfo"
 
 const List = ()=>{
     return (
-        <div className="flex flex-col flex-1">
+        <div className="sm:mt-0 flex flex-col flex-1">
             <UserInfo/>
             <ChatList/>
         </div>
