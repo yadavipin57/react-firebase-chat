@@ -1,6 +1,5 @@
 import { useParams } from "react-router-dom";
 import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
-import { useChatStore } from "../../library/chatStore";
 import { useUserStore } from "../../library/userStore";
 
 const Video = () => {
@@ -25,7 +24,7 @@ const Video = () => {
       sharedLinks: [
         {
           name: "Copy Link",
-          url: `https://reactchat147.web.app/video call/${selectedUserId}`,
+          url: `https://reactchat147.web.app/video-call/${selectedUserId}`,
         },
       ],
       scenario: {

@@ -38,7 +38,7 @@ const App = () => {
       element: <Body />,
     },
     {
-      path: `/video call/:selectedUserId`,
+      path: `/video-call/:selectedUserId`,
       element: <Video />,
     },
   ];

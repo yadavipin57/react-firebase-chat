@@ -114,7 +114,7 @@ const Chat = () => {
   };
 
   const handleVideoCall = useCallback(()=>{
-    navigate(`video call/${selectedUserId}`)
+    navigate(`video-call/${selectedUserId}`)
   }, [])
 
   return (
