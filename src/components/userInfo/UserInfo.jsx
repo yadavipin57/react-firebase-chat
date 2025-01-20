@@ -4,10 +4,8 @@ const UserInfo = ()=>{
 
     const {currentUser} = useUserStore();
 
-    console.log('HELO')
-
     return (
-        <div className="mt-[780px] sm:mt-0 p-4 flex items-center justify-between">
+        <div className="p-4 flex items-center justify-between">
             <div className="flex gap-3 items-center">
                 <img className="w-8 h-8 sm:w-12 sm:h-12 rounded-full cursor-pointer object-cover" src={currentUser.avatar || "./avatar.png"}/>
                 <h2>{currentUser.username}</h2>

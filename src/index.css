@@ -14,15 +14,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100vh;
+    object-fit: cover;
+    /* height: 100vh; */
     color: white;
 }
-/* @media (min-width: 400px) {
+@media (max-width: 400px) {
   body {
     background-image: url("/bg.jpg");
     object-fit: cover;
+    height: auto;
   }
-} */
+}
 /* width */
 ::-webkit-scrollbar {
   width: 6px;

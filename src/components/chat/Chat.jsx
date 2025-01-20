@@ -28,8 +28,13 @@ const Chat = () => {
   // const navigate = useNavigate();
 
   const { currentUser } = useUserStore();
-  const { chatId, user, selectedUserId, isCurrentUserBlocked, isRecieverBlocked } =
-    useChatStore();
+  const {
+    chatId,
+    user,
+    selectedUserId,
+    isCurrentUserBlocked,
+    isRecieverBlocked,
+  } = useChatStore();
 
   const navigate = useNavigate();
 
@@ -113,24 +118,52 @@ const Chat = () => {
     }
   };
 
-  const handleVideoCall = useCallback(()=>{
-    navigate(`video-call/${selectedUserId}`)
-  }, [])
+  const handleVideoCall = useCallback(() => {
+    navigate(`video-call/${selectedUserId}`);
+  }, []);
+
+  const videoElement = document.getElementById('videoElement');
+
+  const handleCamera = () => {
+    // Check if the browser supports getUserMedia
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      // Request access to the user's camera
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then((stream) => {
+          // Assign the video stream to the video element
+          videoElement.srcObject = stream;
+        })
+        .catch((error) => {
+          console.error("Error accessing the camera:", error);
+        });
+    } else {
+      console.log("getUserMedia is not supported by this browser.");
+    }
+  };
 
   return (
-    <div className="h-[100%] flex flex-col flex-[2] border-[#dddddd35] -[1px]">
+    <div className="max-h-[100vh] min-h-[100vh] sm:min-h-[90vh] sm:h-[100%] flex flex-col flex-[2] border-[#dddddd35] -[1px]">
       {/* TOP  */}
-      <div>{selectedUserId}</div>
-      <div className="p-5 flex items-center justify-between border-[#dddddd35] border-b-[1px]">
+      <div className="px-3 py-2 sm:p-3 flex items-center justify-between border-[#dddddd35] border-b-[1px]">
         <div className="flex items-center gap-5">
           <img
             className="w-8 h-8 sm:w-[60px] sm:h-[60px] rounded-full object-cover "
             src={user?.avatar || "./avatar.png"}
           />
           <div className="flex flex-col gap-1">
-            <span className="text-sm sm:text-[18px] font-bold">
-              {user.username}
-            </span>
+            <div className="text-sm flex items-center justify-between sm:text-[18px] font-bold">
+              <div>{user.username}</div>
+              <div className="flex sm:hidden gap-2">
+                <img className="w-4 h-4 cursor-pointer" src="./phone.png" />
+                <img
+                  className="w-4 h-4 cursor-pointer"
+                  onClick={handleVideoCall}
+                  src="./video.png"
+                />
+                <img className="w-4 h-4 cursor-pointer" src="./info.png" />
+              </div>
+            </div>
             <p className="text-[12px] sm:text-[14px] text-[#a5a5a5]">
               Lorem ipsum dolor sit amet consectetur adipisicing elit.
             </p>
@@ -138,13 +171,17 @@ const Chat = () => {
         </div>
         <div className="hidden sm:flex flex-col sm:flex-row gap-3">
           <img className="w-4 h-4 cursor-pointer" src="./phone.png" />
-          <img className="w-4 h-4 cursor-pointer" onClick={handleVideoCall} src="./video.png" />
+          <img
+            className="w-4 h-4 cursor-pointer"
+            onClick={handleVideoCall}
+            src="./video.png"
+          />
           <img className="w-4 h-4 cursor-pointer" src="./info.png" />
         </div>
       </div>
 
       {/* CENTER  */}
-      <div className="p-5 flex flex-col gap-5 overflow-y-scroll flex-1 ">
+      <div className="p-1 sm:max-h-none sm:p-5 flex flex-col sm:h-auto gap-5 overflow-y-scroll flex-1 ">
         {chat?.messages?.map((message) => {
           return (
             <div
@@ -194,7 +231,12 @@ const Chat = () => {
             id="file"
             onChange={handleImage}
           />
-          <img className="w-5 h-5 cursor-pointer" src="./camera.png" />
+          <img
+            onClick={handleCamera}
+            className="w-5 h-5 cursor-pointer"
+            id="videoElement"
+            src="./camera.png"
+          />
           <img className="w-5 h-5 cursor-pointer" src="./mic.png" />
         </div>
         <input

@@ -103,7 +103,7 @@ const Login = () => {
   };
 
   return (
-    <div className="mt-[144px] mb-10 sm:mt-0 sm:mb-0 w-full flex flex-col gap-5 sm:flex-row items-center justify-evenly">
+    <div className="w-full py-6 gap-6 flex flex-col sm:gap-0 sm:p-0 sm:flex sm:flex-row items-center justify-evenly">
       <div className="flex flex-col items-center gap-4 ">
         <h2 className="text-3xl font-bold">Welcome back,</h2>
         <form
