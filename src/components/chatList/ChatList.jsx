@@ -9,9 +9,10 @@ const ChatList = () => {
   const [chats, setChats] = useState([]);
   const [addMode, setAddMode] = useState(false);
   const [userSearch, setUserSearch] = useState("");
+  // const [selectedUserId, setSelectedUserId] = useState("");
 
   const { currentUser } = useUserStore();
-  const { chatId, changeChat } = useChatStore();
+  const { chatId, changeChat, setSelectedUserId, selectedUserId } = useChatStore();
 
   useEffect(() => {
     const unSub = onSnapshot(
@@ -59,6 +60,8 @@ const ChatList = () => {
         chats: userChats,
       });
       changeChat(chat.chatId, chat.user);
+      setSelectedUserId(chat.user.id)
+      
     } catch (err) {
       console.log(err);
     }
@@ -66,7 +69,7 @@ const ChatList = () => {
 
   const filteredChats = chats.filter((c) =>
     c.user.username.toLowerCase().includes(userSearch.toLowerCase())
-  );
+);
 
   return (
     <div className="px-2 flex-1 overflow-y-scroll">
@@ -97,7 +100,6 @@ const ChatList = () => {
             key={chat?.user?.id}
             onClick={() => {
               handleSelect(chat);
-              // handlePrintChat(chat);
             }}
           >
             <img

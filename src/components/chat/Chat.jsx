@@ -1,5 +1,5 @@
 import EmojiPicker from "emoji-picker-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "./Chat.css";
 import {
   arrayUnion,
@@ -13,6 +13,8 @@ import { useChatStore } from "../../library/chatStore";
 import { useUserStore } from "../../library/userStore";
 import upload from "../../library/upload";
 import { format } from "timeago.js";
+import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
 const Chat = () => {
   const [chat, setChat] = useState();
@@ -23,16 +25,20 @@ const Chat = () => {
     url: "",
   });
 
+  // const navigate = useNavigate();
+
   const { currentUser } = useUserStore();
-  const { chatId, user, isCurrentUserBlocked, isRecieverBlocked } =
+  const { chatId, user, selectedUserId, isCurrentUserBlocked, isRecieverBlocked } =
     useChatStore();
 
+  const navigate = useNavigate();
+
   const endRef = useRef(null);
-  
+
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
-  
+
   useEffect(() => {
     const unSub = onSnapshot(doc(db, "chats", chatId), (response) => {
       setChat(response.data());
@@ -107,9 +113,14 @@ const Chat = () => {
     }
   };
 
+  const handleVideoCall = useCallback(()=>{
+    navigate(`video call/${selectedUserId}`)
+  }, [])
+
   return (
     <div className="h-[100%] flex flex-col flex-[2] border-[#dddddd35] -[1px]">
       {/* TOP  */}
+      <div>{selectedUserId}</div>
       <div className="p-5 flex items-center justify-between border-[#dddddd35] border-b-[1px]">
         <div className="flex items-center gap-5">
           <img
@@ -117,16 +128,18 @@ const Chat = () => {
             src={user?.avatar || "./avatar.png"}
           />
           <div className="flex flex-col gap-1">
-            <span className="text-sm sm:text-[18px] font-bold">{user.username}</span>
+            <span className="text-sm sm:text-[18px] font-bold">
+              {user.username}
+            </span>
             <p className="text-[12px] sm:text-[14px] text-[#a5a5a5]">
               Lorem ipsum dolor sit amet consectetur adipisicing elit.
             </p>
           </div>
         </div>
         <div className="hidden sm:flex flex-col sm:flex-row gap-3">
-          <img className="w-4 h-4" src="./phone.png" />
-          <img className="w-4 h-4" src="./video.png" />
-          <img className="w-4 h-4" src="./info.png" />
+          <img className="w-4 h-4 cursor-pointer" src="./phone.png" />
+          <img className="w-4 h-4 cursor-pointer" onClick={handleVideoCall} src="./video.png" />
+          <img className="w-4 h-4 cursor-pointer" src="./info.png" />
         </div>
       </div>
 
@@ -148,7 +161,9 @@ const Chat = () => {
                   />
                 )}
                 <p className="p-2 rounded-lg text-sm">{message.text}</p>
-                <span className="text-[10px]">{format(message.createdAt.toDate())}</span>
+                <span className="text-[10px]">
+                  {format(message.createdAt.toDate())}
+                </span>
               </div>
             </div>
           );

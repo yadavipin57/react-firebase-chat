@@ -4,6 +4,8 @@ const UserInfo = ()=>{
 
     const {currentUser} = useUserStore();
 
+    console.log('HELO')
+
     return (
         <div className="mt-[780px] sm:mt-0 p-4 flex items-center justify-between">
             <div className="flex gap-3 items-center">
